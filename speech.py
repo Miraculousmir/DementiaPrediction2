@@ -7,7 +7,8 @@ import liwc
 import re
 from collections import Counter
 import random
-
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Tokenize function (same as before)
 def tokenize(speech_text):
@@ -41,8 +42,14 @@ def show_page():
     if "selected_image" not in st.session_state:
         # Randomly select a new image only once per session
         pic_list = ["picture0.jpg", "picture1.jpg", "picture2.jpg", "picture3.jpg"]
-        st.session_state.selected_image = random.choice(pic_list)
+        pic_desc= ["A chaotic kitchen scene where people are cooking, but there's a lot of mess. A man is cutting something at the center table, and two women are busy with kitchen tasks. Various kitchen items and utensils are scattered around, and there's smoke coming from a pot on the stove. A mop and bucket are on the floor, a cat is running away, and it seems like the kitchen is in complete disarray.",
+                   "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly.",
+                   "A lively playground scene with children playing. There are various playground structures, like swings and slides, and kids are engaging in different activities, such as jumping rope, playing with a dog, and chatting. Some kids are drinking water from a fountain, and a group sits on a bench observing others. The atmosphere is active and fun, with children spread throughout the playground.",
+                   "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly."]
 
+        ran_idx = random.randint(0,4)
+        #st.image(pic_list[ran_idx])
+        st.session_state.selected_image = pic_list[ran_idx]
     # Display the selected image
     st.image(st.session_state.selected_image)
 
@@ -123,6 +130,16 @@ def show_page():
 
         # Multiply by 10 and round
         dementia_prob_rounded = (dementia_prob * 10).round().astype(int)
+        desc_text = pic_desc[ran_idx]
 
+        # Initialize the TF-IDF Vectorizer
+        vectorizer = TfidfVectorizer()
+
+        # Compute TF-IDF vectors for the texts
+        tfidf_matrix = vectorizer.fit_transform([text, desc_text])
+
+        # Compute cosine similarity between the two vectors
+        similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
+        st.write(f"Cosine Similarity: {similarity[0][0]}")
         # Display the prediction result
-        st.write(f"You have a {dementia_prob_rounded[0]} out of 10 chance of having dementia.")
+        #st.write(f"You have a {dementia_prob_rounded[0]} out of 10 chance of having dementia.")
