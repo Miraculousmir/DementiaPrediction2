@@ -38,14 +38,15 @@ def show_page():
     st.header("Predict with Speech Data", divider="blue")
     st.subheader("Image Description")
 
+    pic_desc = ["A chaotic kitchen scene where people are cooking, but there's a lot of mess. A man is cutting something at the center table, and two women are busy with kitchen tasks. Various kitchen items and utensils are scattered around, and there's smoke coming from a pot on the stove. A mop and bucket are on the floor, a cat is running away, and it seems like the kitchen is in complete disarray.",
+                   "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly.",
+                   "A lively playground scene with children playing. There are various playground structures, like swings and slides, and kids are engaging in different activities, such as jumping rope, playing with a dog, and chatting. Some kids are drinking water from a fountain, and a group sits on a bench observing others. The atmosphere is active and fun, with children spread throughout the playground.",
+                   "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly."]
+    
     # Check if the selected image is already in session state
     if "selected_image" not in st.session_state:
         # Randomly select a new image only once per session
         pic_list = ["picture0.jpg", "picture1.jpg", "picture2.jpg", "picture3.jpg"]
-        pic_desc= ["A chaotic kitchen scene where people are cooking, but there's a lot of mess. A man is cutting something at the center table, and two women are busy with kitchen tasks. Various kitchen items and utensils are scattered around, and there's smoke coming from a pot on the stove. A mop and bucket are on the floor, a cat is running away, and it seems like the kitchen is in complete disarray.",
-                   "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly.",
-                   "A lively playground scene with children playing. There are various playground structures, like swings and slides, and kids are engaging in different activities, such as jumping rope, playing with a dog, and chatting. Some kids are drinking water from a fountain, and a group sits on a bench observing others. The atmosphere is active and fun, with children spread throughout the playground.",
-                   "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly."]
 
         ran_idx = random.randint(0,4)
         #st.image(pic_list[ran_idx])
