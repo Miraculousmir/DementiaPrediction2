@@ -43,6 +43,7 @@ def show_page():
                    "A lively playground scene with children playing. There are various playground structures, like swings and slides, and kids are engaging in different activities, such as jumping rope, playing with a dog, and chatting. Some kids are drinking water from a fountain, and a group sits on a bench observing others. The atmosphere is active and fun, with children spread throughout the playground.",
                    "A neat and organized kitchen with a U-shaped layout. The image shows cupboards, hanging pans, and an organized countertop with minimal items like potted plants and containers. The floor has a checkered tile pattern, and everything appears clean and orderly."]
     
+    ran_idx = 0
     # Check if the selected image is already in session state
     if "selected_image" not in st.session_state:
         # Randomly select a new image only once per session
