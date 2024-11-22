@@ -56,11 +56,12 @@ def show_page():
                 "This is a picture of a typical organized kitchen. The pans are neatly hanging on the wall. There is a fridge, oven, and chimney. The sink is kept clean with no dishes to wash. There's a small vase that adds to the aesthetics of the kitchen. The floor is made of vitrified checkered tiles, which are shiny and spick-free. Such an organized and neat place makes people happy.",
                 "This picture features a mom with her two kids, a girl and a boy. The mom is busy doing the dishes with the sink overflowing with water, while the children are up to some naughty behavior. It seems both are busy stealing cookies from the shelf behind their mom's back. The boy is about to fall as the stool on which he is standing seems to topple while his sister is giggling or laughing and demands more cookies from her brother.",
                 "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."]
-    pic_desc_key = ["chaotic kitchen  man  cutting veggies  girls  cooking  smelly dustbin  overfilled waste  mop  bucket  floor  spilled water   cat middle  items  table  boiling water pots oven disarray ",
+   
+    """pic_desc_key = ["chaotic kitchen  man  cutting veggies  girls  cooking  smelly dustbin  overfilled waste  mop  bucket  floor  spilled water   cat middle  items  table  boiling water pots oven disarray ",
     "chaotic kitchen man cutting veggies girls cooking smelly dustbin overfilled waste mop bucket floor spilled water cat middle items table boiling water pots oven disarray ",
     " mom kids girl boy dishes sink overflowing water naughty behavior stealing cookies shelf behind mom boy falling stool toppling sister giggling laughing demanding cookies mother kitchen cupboard tool curtain basin ",   
 " playground  lively scene  happy people  cheerful children  slide  swings  girl  sharing  friend  bench  uninterested  eating  skipping ropes  elder  baby  stroller  person  dog  children  thirsty  drinking tap water  playing tag  bench  phone  merry atmosphere park "
-    ]
+    ]"""
     
     ran_idx = random.randint(0, 3)
     # Check if the selected image is already in session state
@@ -162,12 +163,12 @@ def show_page():
         # Compute cosine similarity between the two vectors
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         #rounded_similarity= round(similarity[0][0],5)
-        # taken_prob= cosine_to_probability_piecewise(similarity[0][0])
-        words = text.split()
+        taken_prob= cosine_to_probability_piecewise(similarity[0][0])
+        '''words = text.split()
         misspelled = spell.unknown(words)
         if similarity == 0.0 and len(misspelled) == 0:
             st.write("You are talking out of context. Please try again. ")
-        else:
-            st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded[0]}")
+        else:'''
+            st.write(f"Probability of having Dementia out of 100: {taken_prob}")
         # Display the prediction result
         ###st.write(f"{rounded_similarity}")
