@@ -164,11 +164,11 @@ def show_page():
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         #rounded_similarity= round(similarity[0][0],5)
         taken_prob= cosine_to_probability_piecewise(similarity[0][0])
-        '''words = text.split()
+        words = text.split()
         misspelled = spell.unknown(words)
         if similarity == 0.0 and len(misspelled) == 0:
             st.write("You are talking out of context. Please try again. ")
-        else:'''
-            st.write(f"Probability of having Dementia out of 100: {taken_prob}")
+        else:
+            st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded[0]}")
         # Display the prediction result
         ###st.write(f"{rounded_similarity}")
