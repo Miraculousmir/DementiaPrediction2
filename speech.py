@@ -1,3 +1,4 @@
+from spellchecker import SpellChecker
 import pickle
 import streamlit as st
 import speech_recognition as sr
@@ -10,6 +11,7 @@ import random
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+spell = SpellChecker()
 # Tokenize function (same as before)
 def tokenize(speech_text):
     for match in re.finditer(r'\w+', speech_text, re.UNICODE):
@@ -161,7 +163,9 @@ def show_page():
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         #rounded_similarity= round(similarity[0][0],5)
         # taken_prob= cosine_to_probability_piecewise(similarity[0][0])
-        if similarity == 0.0:
+        words = text.split()
+        misspelled = spell.unknown(words)
+        if similarity == 0.0 and len(misspelled) == 0:
             st.write("You are talking out of context. Please try again. ")
         else:
             st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded[0]}")
