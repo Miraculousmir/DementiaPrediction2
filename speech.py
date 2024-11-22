@@ -164,7 +164,7 @@ def show_page():
         # Compute cosine similarity between the two vectors
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         #rounded_similarity= round(similarity[0][0],5)
-        taken_prob= similarity[0][0]
+        taken_prob= cosine_to_probability_piecewise(similarity[0][0])
 
         final_taken_prob = taken_prob
 
