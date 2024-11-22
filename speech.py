@@ -164,6 +164,6 @@ def show_page():
         if similarity == 0.0:
             st.write("You are talking out of context. Please try again. ")
         else:
-            st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded}")
+            st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded[0]}")
         # Display the prediction result
         ###st.write(f"{rounded_similarity}")
