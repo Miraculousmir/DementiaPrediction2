@@ -142,6 +142,6 @@ def show_page():
 
         # Compute cosine similarity between the two vectors
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-        st.write(f"Cosine Similarity: {round(similarity[0][0],5)}")
+        st.write(f"Cosine Similarity: {similarity[0][0]}")
         # Display the prediction result
         #st.write(f"You have a {dementia_prob_rounded[0]} out of 10 chance of having dementia.")
