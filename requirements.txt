@@ -4,3 +4,4 @@ liwc~=0.5.0
 numpy~=2.1.2
 scikit-learn~=1.5.2
 SpeechRecognition~=3.10.4
+pyspellchecker==0.8.1
