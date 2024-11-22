@@ -15,6 +15,18 @@ def tokenize(speech_text):
     for match in re.finditer(r'\w+', speech_text, re.UNICODE):
         yield match.group(0)
 
+def cosine_to_probability_piecewise(cosine_similarity):
+    if cosine_similarity <= 0.2:
+        # Linear transformation for cosine similarity between 0 and 0.2
+        probability = 90 + 25 * cosine_similarity
+    elif 0.2 < cosine_similarity <= 0.6:
+        # Linear transformation for cosine similarity between 0.2 and 0.6
+        probability = 95 - 112.5 * (cosine_similarity - 0.2)
+    else:
+        # Linear transformation for cosine similarity between 0.6 and 1
+        probability = 6 + 5 * (1 - cosine_similarity)
+
+    return round(probability, 2)
 
 # Function to compute category frequencies normalized by total word count
 def compute_liwc_categories(speech_text, category_names, parse):
@@ -143,6 +155,7 @@ def show_page():
         # Compute cosine similarity between the two vectors
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         rounded_similarity= round(similarity[0][0],5)
-        st.write(f"Cosine Similarity: {rounded_similarity}")
+        prob= cosine_to_probability_piecewise(rounded_similarity)
+        st.write(f"Probability of having Dementia: {prob}")
         # Display the prediction result
         #st.write(f"You have a {dementia_prob_rounded[0]} out of 10 chance of having dementia.")
