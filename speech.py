@@ -166,7 +166,7 @@ def show_page():
         #rounded_similarity= round(similarity[0][0],5)
         taken_prob= similarity[0][0]
 
-        final_taken_prob = 10 - (taken_prob*10)
+        final_taken_prob = 10 - (taken_prob*100)
 
     
         # words = text.split()
