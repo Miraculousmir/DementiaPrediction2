@@ -158,4 +158,4 @@ def show_page():
         prob= cosine_to_probability_piecewise(rounded_similarity)
         #st.write(f"Probability of having Dementia out of 100: {rounded_similarity}")
         # Display the prediction result
-        st.write(f"{similarity[0][0]}")
+        st.write(f"{rounded_similarity}")
