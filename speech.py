@@ -156,6 +156,6 @@ def show_page():
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         rounded_similarity= round(similarity[0][0],5)
         prob= cosine_to_probability_piecewise(rounded_similarity)
-        st.write(f"Probability of having Dementia out of 100: {prob}")
+        st.write(f"Probability of having Dementia out of 100: {rounded_similarity}")
         # Display the prediction result
         #st.write(f"You have a {dementia_prob_rounded[0]} out of 10 chance of having dementia.")
