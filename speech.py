@@ -58,7 +58,7 @@ def show_page():
                 "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."]
    
     pic_desc_key = ["chaotic kitchen  man  cutting veggies  girls  cooking  smelly dustbin  overfilled waste  mop  bucket  floor  spilled water   cat middle  items  table  boiling water pots oven disarray ",
-    "chaotic kitchen man cutting veggies girls cooking smelly dustbin overfilled waste mop bucket floor spilled water cat middle items table boiling water pots oven disarray ",
+    "typical organized kitchen pans neatly hanging fridge oven chimney clean sink no dishes small vase aesthetics vitrified checkered tiles shiny spick-free neat place happy",
     " mom kids girl boy dishes sink overflowing water naughty behavior stealing cookies shelf behind mom boy falling stool toppling sister giggling laughing demanding cookies mother kitchen cupboard tool curtain basin ",   
 " playground  lively scene  happy people  cheerful children  slide  swings  girl  sharing  friend  bench  uninterested  eating  skipping ropes  elder  baby  stroller  person  dog  children  thirsty  drinking tap water  playing tag  bench  phone  merry atmosphere park "
     ]
