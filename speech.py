@@ -165,7 +165,7 @@ def show_page():
         #rounded_similarity= round(similarity[0][0],5)
         taken_prob= similarity[0][0]
         # words = text.split()
-        misspelled = spell.unknown(words)
+        # misspelled = spell.unknown(words)
         # if similarity == 0.0 and len(misspelled) == 0:
         # st.write("You are talking out of context. Please try again. ")
         # else:
