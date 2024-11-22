@@ -10,6 +10,9 @@ from collections import Counter
 import random
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 # spell = SpellChecker()
 # Tokenize function (same as before)
@@ -47,6 +50,73 @@ def compute_liwc_categories(speech_text, category_names, parse):
 
     return category_frequencies
 
+def compute_liwc_datalist(model, liwc_df):
+    input_row_format = pd.read_csv('input_row_format.csv')
+
+    # Ensure that liwc_df has the same columns as X_train
+    liwc_df = liwc_df.reindex(columns=input_row_format.columns, fill_value=0)
+
+    y_prob = model.predict_proba(liwc_df)
+
+        # The output of predict_proba() is an array with two columns:
+        # Column 0: Probability of the class '0' (no dementia)
+        # Column 1: Probability of the class '1' (dementia)
+
+        # To get the probability of dementia (class 1):
+    dementia_prob = y_prob[:, 1]  # This gives the probability of class 1 (dementia)
+
+    # Multiply by 10 and round
+    dementia_prob_rounded = (dementia_prob * 10).round().astype(int)
+    return dementia_prob_rounded[0]
+
+def compute_cosine_similarity_datalist(text, desc_text):
+
+        # Initialize the TF-IDF Vectorizer
+    vectorizer = TfidfVectorizer()
+
+        # Compute TF-IDF vectors for the texts
+    tfidf_matrix = vectorizer.fit_transform([text, desc_text])
+
+        # Compute cosine similarity between the two vectors
+    similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
+
+    #rounded_similarity= round(similarity[0][0],5)
+    taken_prob= similarity[0][0]
+
+    return taken_prob
+
+def compute_final_score(dementia_prob_rounded_final, final_taken_prob):
+    
+    data = pd.DataFrame({
+        'dementia_prob_rounded_final': dementia_prob_rounded_final,
+        'final_taken_prob': final_taken_prob
+    })
+
+
+    # Features and target
+    x = data['dementia_prob_rounded_final']
+    y = data['final_taken_prob']
+
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+    # Train a logistic regression model
+    model2 = LogisticRegression()
+    model2.fit(x_train, y_train)
+
+    # Extract weights (coefficients)
+    weights = model2.coef_[0]
+    w1, w2 = weights / sum(weights)  # Normalize weights
+
+    # Predict probabilities
+    y_pred_prob = model2.predict_proba(x_test)[:, 1]
+    y_pred = (y_pred_prob > 0.5).astype(int)
+
+    # Evaluate the model
+    accuracy = accuracy_score(y_test, y_pred)
+
+    final_score = w1 * data['dementia_prob_rounded_final'] + w2 * data['final_taken_prob']
+
+    return final_score
 
 def show_page():
     st.header("Predict with Speech Data", divider="blue")
@@ -58,7 +128,7 @@ def show_page():
                 "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."]
    
     pic_desc_key = ["chaotic kitchen  man  cutting veggies  girls  cooking  smelly dustbin  overfilled waste  mop  bucket  floor  spilled water   cat middle  items  table  boiling water pots oven disarray ",
-    "typical organized kitchen pans neatly hanging fridge oven chimney clean sink no dishes small vase aesthetics vitrified checkered tiles shiny spick-free neat place happy",
+    "chaotic kitchen man cutting veggies girls cooking smelly dustbin overfilled waste mop bucket floor spilled water cat middle items table boiling water pots oven disarray ",
     " mom kids girl boy dishes sink overflowing water naughty behavior stealing cookies shelf behind mom boy falling stool toppling sister giggling laughing demanding cookies mother kitchen cupboard tool curtain basin ",   
 " playground  lively scene  happy people  cheerful children  slide  swings  girl  sharing  friend  bench  uninterested  eating  skipping ropes  elder  baby  stroller  person  dog  children  thirsty  drinking tap water  playing tag  bench  phone  merry atmosphere park "
     ]
@@ -136,44 +206,23 @@ def show_page():
         # Displaying a confirmation message and the entered information
         st.success("Submitted Successfully!")
 
-        input_row_format = pd.read_csv('input_row_format.csv')
+        dementia_prob_rounded_final = []
 
-        # Ensure that liwc_df has the same columns as X_train
-        liwc_df = liwc_df.reindex(columns=input_row_format.columns, fill_value=0)
+        final_taken_prob = []
 
-        y_prob = model.predict_proba(liwc_df)
-
-        # The output of predict_proba() is an array with two columns:
-        # Column 0: Probability of the class '0' (no dementia)
-        # Column 1: Probability of the class '1' (dementia)
-
-        # To get the probability of dementia (class 1):
-        dementia_prob = y_prob[:, 1]  # This gives the probability of class 1 (dementia)
-
-        # Multiply by 10 and round
-        dementia_prob_rounded = (dementia_prob * 10).round().astype(int)
-        dementia_prob_rounded_final = dementia_prob_rounded[0] * 0.2
+        
         desc_text = pic_desc_key[ran_idx]
 
-        # Initialize the TF-IDF Vectorizer
-        vectorizer = TfidfVectorizer()
+        for i in range(0,5):
+            dementia_prob_rounded_final.append(compute_liwc_datalist(liwc_df))
+            final_taken_prob.append(compute_cosine_similarity_datalist(desc_text, text))
 
-        # Compute TF-IDF vectors for the texts
-        tfidf_matrix = vectorizer.fit_transform([text, desc_text])
 
-        # Compute cosine similarity between the two vectors
-        similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-        #rounded_similarity= round(similarity[0][0],5)
-        taken_prob= similarity[0][0]
-
-        final_taken_prob = taken_prob
-
-    
+        final_score = compute_final_score(dementia_prob_rounded_final, final_taken_prob)
         # words = text.split()
         # misspelled = spell.unknown(words)
         # if similarity == 0.0 and len(misspelled) == 0:
         # st.write("You are talking out of context. Please try again. ")
         # else:
-    st.write(f"Probability of having Dementia out of 10: {final_taken_prob}")
-        # Display the prediction result
+    st.write(f"Probability of having Dementia out of 10: {final_score}")
         ###st.write(f"{rounded_similarity}")
