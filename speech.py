@@ -152,6 +152,7 @@ def show_page():
 
         # Multiply by 10 and round
         dementia_prob_rounded = (dementia_prob * 10).round().astype(int)
+        dementia_prob_rounded_final = dementia_prob_rounded[0] * 0.2
         desc_text = pic_desc_key[ran_idx]
 
         # Initialize the TF-IDF Vectorizer
@@ -164,11 +165,13 @@ def show_page():
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         #rounded_similarity= round(similarity[0][0],5)
         taken_prob= similarity[0][0]
+
+        final_taken_prob = 10 - (taken_prob * 10)
         # words = text.split()
         # misspelled = spell.unknown(words)
         # if similarity == 0.0 and len(misspelled) == 0:
         # st.write("You are talking out of context. Please try again. ")
         # else:
-    st.write(f"Probability of having Dementia out of 10: {int(dementia_prob_rounded[0] * 0.2 * (10 - taken_prob * 10))}")
+    st.write(f"Probability of having Dementia out of 10: {int(dementia_prob_rounded_final * final_taken_prob)}")
         # Display the prediction result
         ###st.write(f"{rounded_similarity}")
