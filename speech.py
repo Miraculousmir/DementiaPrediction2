@@ -193,5 +193,5 @@ def show_page():
             st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded_final}")
         # Display the prediction result
         ###st.write(f"{rounded_similarity}")'''
-        final_prediction = 5 + (5 * dementia_prob) - (5 * similarity)
-        st.write(f"You have a {final_prediction[0][0]} out of 10 chance of having Dementia")
+        final_prediction = (2 + (8 * dementia_prob) - (2 * similarity)) * 10
+        st.write(f"You have a {final_prediction[0][0]:.2f}% chance of having Dementia")
