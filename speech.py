@@ -1,4 +1,4 @@
-from spellchecker import SpellChecker
+# from spellchecker import SpellChecker
 import pickle
 import streamlit as st
 import speech_recognition as sr
@@ -11,11 +11,15 @@ import random
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-spell = SpellChecker()
+
+# spell = SpellChecker()
+
+
 # Tokenize function (same as before)
 def tokenize(speech_text):
     for match in re.finditer(r'\w+', speech_text, re.UNICODE):
         yield match.group(0)
+
 
 def cosine_to_probability_piecewise(cosine_similarity):
     if cosine_similarity <= 0.2:
@@ -29,6 +33,7 @@ def cosine_to_probability_piecewise(cosine_similarity):
         probability = 6 + 5 * (1 - cosine_similarity)
 
     return round(probability, 2)
+
 
 # Function to compute category frequencies normalized by total word count
 def compute_liwc_categories(speech_text, category_names, parse):
@@ -49,28 +54,37 @@ def compute_liwc_categories(speech_text, category_names, parse):
 
 
 def show_page():
-    st.header("Predict with Speech Data", divider="blue")
+    st.header("Predict with text or audio", divider="blue")
     st.subheader("Image Description")
 
-    pic_desc = ["This is a picture featuring a chaotic kitchen scene. The man is busy cutting veggies while the girls are cooking something. The dustbin is smelly and overfilled with waste. The mop and bucket are lying on the floor with water spilled over. The cat is sitting in the middle. There are many items on the table. The water in the pots in the oven is boiling. The kitchen is in complete disarray.",
-                "This is a picture of a typical organized kitchen. The pans are neatly hanging on the wall. There is a fridge, oven, and chimney. The sink is kept clean with no dishes to wash. There's a small vase that adds to the aesthetics of the kitchen. The floor is made of vitrified checkered tiles, which are shiny and spick-free. Such an organized and neat place makes people happy.",
-                "This picture features a mom with her two kids, a girl and a boy. The mom is busy doing the dishes with the sink overflowing with water, while the children are up to some naughty behavior. It seems both are busy stealing cookies from the shelf behind their mom's back. The boy is about to fall as the stool on which he is standing seems to topple while his sister is giggling or laughing and demands more cookies from her brother.",
-                "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."]
-   
-    pic_desc_key = ["chaotic kitchen  man  cutting veggies  girls  cooking  smelly dustbin  overfilled waste  mop  bucket  floor  spilled water   cat middle  items  table  boiling water pots oven disarray ",
-    "typical organized kitchen pans neatly hanging fridge oven chimney clean sink no dishes small vase aesthetics vitrified checkered tiles shiny spick-free neat place happy",
-    " mom kids girl boy dishes sink overflowing water naughty behavior stealing cookies shelf behind mom boy falling stool toppling sister giggling laughing demanding cookies mother kitchen cupboard tool curtain basin ",   
-" playground  lively scene  happy people  cheerful children  slide  swings  girl  sharing  friend  bench  uninterested  eating  skipping ropes  elder  baby  stroller  person  dog  children  thirsty  drinking tap water  playing tag  bench  phone  merry atmosphere park "
+    # Ensure ran_idx is stored in session state
+    if "ran_idx" not in st.session_state:
+        st.session_state.ran_idx = random.randint(0, 3)
+
+    # Use the persistent ran_idx value from session state
+    ran_idx = st.session_state.ran_idx
+
+    pic_desc = [
+        "This is a picture featuring a chaotic kitchen scene. The man is busy cutting veggies while the girls are cooking something. The dustbin is smelly and overfilled with waste. The mop and bucket are lying on the floor with water spilled over. The cat is sitting in the middle. There are many items on the table. The water in the pots in the oven is boiling. The kitchen is in complete disarray.",
+        "This is a picture of a typical organized kitchen. The pans are neatly hanging on the wall. There is a fridge, oven, and chimney. The sink is kept clean with no dishes to wash. There's a small vase that adds to the aesthetics of the kitchen. The floor is made of vitrified checkered tiles, which are shiny and spick-free. Such an organized and neat place makes people happy.",
+        "This picture features a mom with her two kids, a girl and a boy. The mom is busy doing the dishes with the sink overflowing with water, while the children are up to some naughty behavior. It seems both are busy stealing cookies from the shelf behind their mom's back. The boy is about to fall as the stool on which he is standing seems to topple while his sister is giggling or laughing and demands more cookies from her brother.",
+        "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."]
+
+    pic_desc_key = [
+        "chaotic kitchen  man  cutting veggies  girls  cooking  smelly dustbin  overfilled waste  mop  bucket  floor  spilled water   cat middle  items  table  boiling water pots oven disarray ",
+        "typical organized kitchen pans neatly hanging fridge oven chimney clean sink no dishes small vase aesthetics vitrified checkered tiles shiny spick-free neat place happy",
+        " mom kids girl boy dishes sink overflowing water naughty behavior stealing cookies shelf behind mom boy falling stool toppling sister giggling laughing demanding cookies mother kitchen cupboard tool curtain basin ",
+        " playground  lively scene  happy people  cheerful children  slide  swings  girl  sharing  friend  bench  uninterested  eating  skipping ropes  elder  baby  stroller  person  dog  children  thirsty  drinking tap water  playing tag  bench  phone  merry atmosphere park "
     ]
-    
-    ran_idx = random.randint(0, 3)
+
+    # ran_idx = random.randint(0, 3)
     # Check if the selected image is already in session state
     if "selected_image" not in st.session_state:
         # Randomly select a new image only once per session
         pic_list = ["picture0.jpg", "picture1.jpg", "picture2.jpg", "picture3.jpg"]
 
-        #ran_idx = random.randint(0,4)
-        #st.image(pic_list[ran_idx])
+        # ran_idx = random.randint(0,4)
+        # st.image(pic_list[ran_idx])
         st.session_state.selected_image = pic_list[ran_idx]
     # Display the selected image
     st.image(st.session_state.selected_image)
@@ -150,9 +164,10 @@ def show_page():
         # To get the probability of dementia (class 1):
         dementia_prob = y_prob[:, 1]  # This gives the probability of class 1 (dementia)
 
-        # Multiply by 10 and round
+        '''# Multiply by 10 and round
         dementia_prob_rounded = (dementia_prob * 10).round().astype(int)
         dementia_prob_rounded_final = dementia_prob_rounded[0] * 0.2
+        '''
         desc_text = pic_desc_key[ran_idx]
 
         # Initialize the TF-IDF Vectorizer
@@ -163,8 +178,9 @@ def show_page():
 
         # Compute cosine similarity between the two vectors
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-        #rounded_similarity= round(similarity[0][0],5)
-        taken_prob= cosine_to_probability_piecewise(similarity[0][0])
+
+        # rounded_similarity= round(similarity[0][0],5)
+        '''taken_prob= cosine_to_probability_piecewise(similarity[0][0])
 
         final_taken_prob = taken_prob
 
@@ -176,4 +192,6 @@ def show_page():
         else:
             st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded_final}")
         # Display the prediction result
-        ###st.write(f"{rounded_similarity}")
+        ###st.write(f"{rounded_similarity}")'''
+        final_prediction = 5 + (5 * dementia_prob) - (5 * similarity)
+        st.write(f"You have a {final_prediction[0][0]} out of 10 chance of having Dementia")
