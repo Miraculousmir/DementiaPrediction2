@@ -213,7 +213,7 @@ def show_page():
         dementia_prob_rounded = (dementia_prob * 10).round().astype(int)
         dementia_prob_rounded_final = dementia_prob_rounded[0] * 0.2
         '''
-        desc_text = pic_desc_key[ran_idx]
+        desc_text = pic_desc[ran_idx]
 
         # Initialize the TF-IDF Vectorizer
         vectorizer = TfidfVectorizer()
