@@ -34,6 +34,38 @@ def cosine_to_probability_piecewise(cosine_similarity):
 
     return round(probability, 2)
 
+def classify_dementia_scale(cosine_similarity, dementia_prob):
+    # First, apply the cosine_to_probability_piecewise transformation to map cosine similarity to a range
+    def cosine_to_probability_piecewise(cosine_similarity):
+        if cosine_similarity <= 0.2:
+            # Linear transformation for cosine similarity between 0 and 0.2
+            probability = 90 + 25 * cosine_similarity
+        elif 0.2 < cosine_similarity <= 0.6:
+            # Linear transformation for cosine similarity between 0.2 and 0.6
+            probability = 95 - 112.5 * (cosine_similarity - 0.2)
+        else:
+            # Linear transformation for cosine similarity between 0.6 and 1
+            probability = 6 + 5 * (1 - cosine_similarity)
+
+        return round(probability, 2)
+
+    # Get the transformation of cosine similarity to probability
+    similarity_prob = cosine_to_probability_piecewise(cosine_similarity)
+
+    # Scale the dementia probability (between 0 and 1) to the range [32, 96]
+    scaled_dementia_prob = 32 + (dementia_prob * (96 - 32))
+
+    # Now, blend the similarity-based probability and the dementia probability
+    # Higher cosine similarity should push the result higher in the range (more towards 96%)
+    if cosine_similarity >= 0.6:
+        # If cosine similarity is high, give more weight to the dementia probability
+        final_probability = (0.7 * scaled_dementia_prob) + (0.3 * similarity_prob)
+    else:
+        # If cosine similarity is low, give more weight to the similarity-based probability
+        final_probability = (0.3 * scaled_dementia_prob) + (0.7 * similarity_prob)
+
+    return round(final_probability, 2)
+
 
 # Function to compute category frequencies normalized by total word count
 def compute_liwc_categories(speech_text, category_names, parse):
@@ -193,5 +225,6 @@ def show_page():
             st.write(f"Probability of having Dementia out of 10: {dementia_prob_rounded_final}")
         # Display the prediction result
         ###st.write(f"{rounded_similarity}")'''
-        final_prediction = (2 + (8 * dementia_prob) - (2 * similarity)) * 10
+        #final_prediction = (2 + (8 * dementia_prob) - (2 * similarity)) * 10
+        final_prediction= classify_dementia_scale(cosine_similarity, dementia_prob)
         st.write(f"You have a {final_prediction[0][0]:.2f}% chance of having Dementia")
