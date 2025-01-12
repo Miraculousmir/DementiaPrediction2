@@ -227,5 +227,5 @@ def show_page():
         ###st.write(f"{rounded_similarity}")'''
         #final_prediction = (2 + (8 * dementia_prob) - (2 * similarity)) * 10
         #final_prediction= classify_dementia_scale(cosine_similarity, dementia_prob)
-        st.write(f"You have a {classify_dementia_scale(cosine_similarity, dementia_prob)}% chance of having Dementia")
+        st.write(f"You have a {classify_dementia_scale(similarity, dementia_prob)}% chance of having Dementia")
 
