@@ -72,10 +72,10 @@ def classify_dementia_scale(cosine_similarity, dementia_prob):
     # Higher cosine similarity should push the result higher in the range (more towards 96%)
     if cosine_similarity >= 0.4:
         # If cosine similarity is high, give more weight to the dementia probability
-        final_probability = (0.8 * scaled_dementia_prob) + (0.2 * similarity_prob)
+        final_probability = (0.6 * scaled_dementia_prob) + (0.4 * similarity_prob)
     else:
         # If cosine similarity is low, give more weight to the similarity-based probability
-        final_probability = (0.2 * scaled_dementia_prob) + (0.8 * similarity_prob)
+        final_probability = (0.4 * scaled_dementia_prob) + (0.6 * similarity_prob)
 
     return round(final_probability, 2)
 
