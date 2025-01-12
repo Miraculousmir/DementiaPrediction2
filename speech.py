@@ -47,7 +47,7 @@ def classify_dementia_scale(cosine_similarity, dementia_prob):
             # Linear transformation for cosine similarity between 0.6 and 1
             probability = 6 + 5 * (1 - cosine_similarity)
 
-        return round(probability, 2)
+        return round(probability)
 
     # Get the transformation of cosine similarity to probability
     similarity_prob = cosine_to_probability_piecewise(cosine_similarity)
