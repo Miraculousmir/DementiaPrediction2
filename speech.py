@@ -35,8 +35,14 @@ def tokenize(speech_text):
     return round(probability, 2)'''
 
 def classify_dementia_scale(cosine_similarity, dementia_prob):
+    
+
     # First, apply the cosine_to_probability_piecewise transformation to map cosine similarity to a range
     def cosine_to_probability_piecewise(cosine_similarity):
+        # Ensure cosine_similarity is a scalar
+        if isinstance(cosine_similarity, (np.ndarray, list)):
+            cosine_similarity = float(cosine_similarity[0])  # Convert to scalar if array-like
+
         if cosine_similarity <= 0.2:
             # Linear transformation for cosine similarity between 0 and 0.2
             probability = 90 + 25 * cosine_similarity
@@ -48,6 +54,12 @@ def classify_dementia_scale(cosine_similarity, dementia_prob):
             probability = 6 + 5 * (1 - cosine_similarity)
 
         return round(probability)
+
+    # Ensure inputs are scalars
+    if isinstance(cosine_similarity, (np.ndarray, list)):
+        cosine_similarity = float(cosine_similarity[0])
+    if isinstance(dementia_prob, (np.ndarray, list)):
+        dementia_prob = float(dementia_prob[0])
 
     # Get the transformation of cosine similarity to probability
     similarity_prob = cosine_to_probability_piecewise(cosine_similarity)
