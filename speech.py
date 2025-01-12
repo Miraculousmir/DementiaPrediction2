@@ -21,7 +21,7 @@ def tokenize(speech_text):
         yield match.group(0)
 
 
-def cosine_to_probability_piecewise(cosine_similarity):
+'''def cosine_to_probability_piecewise(cosine_similarity):
     if cosine_similarity <= 0.2:
         # Linear transformation for cosine similarity between 0 and 0.2
         probability = 90 + 25 * cosine_similarity
@@ -32,7 +32,7 @@ def cosine_to_probability_piecewise(cosine_similarity):
         # Linear transformation for cosine similarity between 0.6 and 1
         probability = 6 + 5 * (1 - cosine_similarity)
 
-    return round(probability, 2)
+    return round(probability, 2)'''
 
 def classify_dementia_scale(cosine_similarity, dementia_prob):
     # First, apply the cosine_to_probability_piecewise transformation to map cosine similarity to a range
@@ -227,5 +227,5 @@ def show_page():
         ###st.write(f"{rounded_similarity}")'''
         #final_prediction = (2 + (8 * dementia_prob) - (2 * similarity)) * 10
         #final_prediction= classify_dementia_scale(cosine_similarity, dementia_prob)
-        st.write(f"You have a {classify_dementia_scale(cosine_sim, dementia_prob)}% chance of having Dementia")
+        st.write(f"You have a {classify_dementia_scale(cosine_similarity, dementia_prob)}% chance of having Dementia")
 
