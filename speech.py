@@ -298,7 +298,7 @@ def show_page():
         col1, col2 = st.columns(2)
         with col1:
             st.write("Linguistic Score(LIWC)")
-            st.write(f"### {classify_dementia_scale(similarity, dementia_prob)}%")
+            st.write(f"### {dementia_prob}%")
 
         with col2:
             if not flag:
