@@ -298,9 +298,9 @@ def show_page():
         col1, col2 = st.columns(2)
         with col1:
             st.write("Linguistic Score(LIWC)")
-            st.write(f"### {dementia_prob[0] * 100:.2f}%")
+            st.write(f"### {dementia_prob[0] * 10:.2f}%")
 
         with col2:
             if not flag:
                 st.write("Acoustic Score(MFCC)")
-                st.write(f"### {dementia_prob2[1] * 100:.2f}%")
+                st.write(f"### {dementia_prob2[1] * 10:.2f}%")
