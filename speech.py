@@ -293,7 +293,8 @@ def show_page():
         ###st.write(f"{rounded_similarity}")'''
         # final_prediction = (2 + (8 * dementia_prob) - (2 * similarity)) * 10
         # final_prediction= classify_dementia_scale(cosine_similarity, dementia_prob)
-        dementia_prob2 = predict_dementia(features_468)
+        if not flag:
+            dementia_prob2 = predict_dementia(features_468)
         col1, col2 = st.columns(2)
         with col1:
             st.write("Linguistic Score(LIWC)")
