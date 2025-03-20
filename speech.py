@@ -175,10 +175,11 @@ def show_page():
     description_method = st.selectbox("Choose a description method:", ("Describe with text", "Describe with audio"))
 
     text = ""
+    flag = False
     if description_method == "Describe with text":
         # Text input for manual description
         text = st.text_input("Please describe the picture here:")
-
+        flag = True
     elif description_method == "Describe with audio":
         # Initialize the recognizer
         recognizer = sr.Recognizer()
@@ -299,5 +300,6 @@ def show_page():
             st.write(f"### {classify_dementia_scale(similarity, dementia_prob)}%")
 
         with col2:
-            st.write("Acoustic Score(MFCC)")
-            st.write(f"### {dementia_prob2[1] * 100:.2f}%")
+            if not flag:
+                st.write("Acoustic Score(MFCC)")
+                st.write(f"### {dementia_prob2[1] * 100:.2f}%")
