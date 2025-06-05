@@ -292,32 +292,28 @@ if st.session_state.task == 1:
 
 # === TASK 2 ===
 elif st.session_state.task == 2:
-    idx = st.session_state.current_question_index
+    st.title("Dementia Detection - Task 2")
     questions = st.session_state.math_questions
+    idx = st.session_state.current_question_index
 
     if idx < len(questions):
-        st.title("Dementia Detection - Task 2")
         question, correct_answer = questions[idx]
 
         st.subheader(f"Question {idx + 1}: {question} = ?")
 
-        # Show time and progress
         progress = st.progress(st.session_state.timer / 10)
         st.write(f"⏳ {10 - st.session_state.timer} seconds left")
 
-        # Keep user input field updated
         user_answer = st.text_input("Enter your answer:", key=f"answer_{idx}")
 
         if st.session_state.timer >= 10:
-            # Process the answer after time's up
             try:
                 if user_answer.strip() != "" and int(user_answer.strip()) == correct_answer:
                     st.session_state.correct_count += 1
                 st.session_state.math_answers.append(user_answer.strip())
             except:
-                st.session_state.math_answers.append("")  # Invalid input
+                st.session_state.math_answers.append("")  # invalid input
 
-            # Move to next question
             st.session_state.current_question_index += 1
             st.session_state.timer = 0
             st.rerun()
@@ -325,7 +321,11 @@ elif st.session_state.task == 2:
             time.sleep(1)
             st.session_state.timer += 1
             st.rerun()
-    else:
+
+    # All questions done — show NEXT only now
+    elif idx >= len(questions):
+        st.success("You've completed all math questions.")
+        st.write(f"You got {st.session_state.correct_count} out of 6 correct.")
         if st.button("Next"):
             st.session_state.task = 3
             st.rerun()
