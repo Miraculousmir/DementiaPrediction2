@@ -300,18 +300,15 @@ elif st.session_state.task == 2:
         question, correct_answer = questions[idx]
         st.subheader(f"Question {idx + 1}: {question} = ?")
 
-        # Show time and progress bar
+        # Show timer and progress
         st.write(f"⏳ {10 - st.session_state.timer} seconds left")
         st.progress(st.session_state.timer / 10)
 
-        # If still timing
         if st.session_state.timer < 10:
             st.text_input("Enter your answer:", key=f"answer_{idx}")
             time.sleep(1)
             st.session_state.timer += 1
             st.rerun()
-
-        # After 10 seconds, evaluate and go to next question
         else:
             user_answer = st.session_state.get(f"answer_{idx}", "")
             try:
@@ -325,11 +322,11 @@ elif st.session_state.task == 2:
             st.session_state.timer = 0
             st.rerun()
 
-    # After all questions
+    # Show "Next" button only once — after all questions
     else:
-        st.success("You've completed all 6 math questions.")
-        st.write(f"✅ Correct answers: {st.session_state.correct_count} / 6")
-        if st.button("Next"):
+        st.success("✅ All 6 questions completed.")
+        st.write(f"Correct answers: {st.session_state.correct_count} / 6")
+        if st.button("Next Task"):
             st.session_state.task = 3
             st.rerun()
 
