@@ -5,3 +5,4 @@ pandas~=2.2.3
 streamlit~=1.45.0
 spacy~=3.8.5
 scikit-learn~=1.6.1
+SpeechRecognition~=3.14.3
