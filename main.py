@@ -11,13 +11,12 @@ import librosa
 import liwc
 import numpy as np
 import pandas as pd
-import spacy.cli
+import spacy
 import speech_recognition as sr
 import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-spacy.cli.download("en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 
 
