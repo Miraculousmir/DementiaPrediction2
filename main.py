@@ -1,21 +1,23 @@
 import io
 import math
 import pickle
+import random
+import re
+import time
 import wave
 from collections import Counter
+
 import librosa
 import liwc
 import numpy as np
 import pandas as pd
-import streamlit as st
-import random
-import time
+import spacy.cli
 import speech_recognition as sr
+import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import re
-import spacy
 
+spacy.cli.download("en_core_web_sm")
 nlp = spacy.load("en_core_web_sm")
 
 
