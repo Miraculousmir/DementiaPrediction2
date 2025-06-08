@@ -1,21 +1,21 @@
 import io
 import math
+import pickle
 import random
 import re
 import time
 import wave
 from collections import Counter
+
 import librosa
 import liwc
-import spacy
-import speech_recognition as sr
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import streamlit as st
 import numpy as np
 import pandas as pd
-import pickle
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+import spacy
+import speech_recognition as sr
+import streamlit as st
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -269,356 +269,231 @@ with open('linguistic.pkl', 'rb') as f:
 with open('acoustic.pkl', 'rb') as f:
     acoustic = pickle.load(f)
 
-tab1, tab2 = st.tabs(["Dementia detection through speech", "Dementia detection through demographics"])
-with tab1:
-    # === TASK 1 ===
-    if st.session_state.task == 1:
-        st.title("Dementia Detection - Task 1")
-        st.image(st.session_state.selected_image, caption="Describe this image with your voice")
+# === TASK 1 ===
+if st.session_state.task == 1:
+    st.title("Dementia Detection - Task 1")
+    st.image(st.session_state.selected_image, caption="Describe this image with your voice")
 
-        st.write("🎤 Record your voice description:")
-        audio_file = st.audio_input("Record audio here:")
+    st.write("🎤 Record your voice description:")
+    audio_file = st.audio_input("Record audio here:")
 
-        if audio_file is not None:
-            st.audio(audio_file, format='audio/wav')
-            st.session_state.voice_audio = audio_file
+    if audio_file is not None:
+        st.audio(audio_file, format='audio/wav')
+        st.session_state.voice_audio = audio_file
 
-        if st.button("Next"):
-            if st.session_state.voice_audio is not None:
-                st.session_state.task = 2
-                st.session_state.timer = 0
-                st.session_state.answered = False
-                st.rerun()
-            else:
-                st.warning("Please record your voice before proceeding.")
-
-    # === TASK 2 ===
-    elif st.session_state.task == 2:
-        st.title("Dementia Detection - Task 2")
-        questions = st.session_state.math_questions
-        idx = st.session_state.current_question_index
-
-        if idx < len(questions):
-            question, correct_answer = questions[idx]
-            st.subheader(f"Question {idx + 1}: {question} = ?")
-
-            # Show timer and progress
-            st.write(f"⏳ {10 - st.session_state.timer} seconds left")
-            st.progress(st.session_state.timer / 10)
-
-            if st.session_state.timer < 10:
-                st.text_input("Enter your answer:", key=f"answer_{idx}")
-                time.sleep(1)
-                st.session_state.timer += 1
-                st.rerun()
-            else:
-                user_answer = st.session_state.get(f"answer_{idx}", "")
-                try:
-                    if user_answer.strip() != "" and int(user_answer.strip()) == correct_answer:
-                        st.session_state.correct_count += 1
-                    st.session_state.math_answers.append(user_answer.strip())
-                except:
-                    st.session_state.math_answers.append("")
-
-                st.session_state.current_question_index += 1
-                st.session_state.timer = 0
-                st.rerun()
-
-        # Show "Next" button only once — after all questions
+    if st.button("Next"):
+        if st.session_state.voice_audio is not None:
+            st.session_state.task = 2
+            st.session_state.timer = 0
+            st.session_state.answered = False
+            st.rerun()
         else:
-            st.success("✅ All 6 questions completed.")
-            st.write(f"Correct answers: {st.session_state.correct_count} / 6")
-            if st.button("Next Task"):
-                st.session_state.task = 3
-                st.rerun()
+            st.warning("Please record your voice before proceeding.")
 
-    # === TASK 3 ===
-    elif st.session_state.task == 3:
-        st.title("Dementia Detection - Task 3")
-        st.subheader("Describe the same image from Task 1 (without seeing it):")
+# === TASK 2 ===
+elif st.session_state.task == 2:
+    st.title("Dementia Detection - Task 2")
+    questions = st.session_state.math_questions
+    idx = st.session_state.current_question_index
 
-        text_input = st.text_area("Describe the image in text:", value=st.session_state.text_input)
-        st.session_state.text_input = text_input
+    if idx < len(questions):
+        question, correct_answer = questions[idx]
+        st.subheader(f"Question {idx + 1}: {question} = ?")
 
-        if st.button("Submit"):
-            st.session_state.task = 4
+        # Show timer and progress
+        st.write(f"⏳ {10 - st.session_state.timer} seconds left")
+        st.progress(st.session_state.timer / 10)
+
+        if st.session_state.timer < 10:
+            st.text_input("Enter your answer:", key=f"answer_{idx}")
+            time.sleep(1)
+            st.session_state.timer += 1
             st.rerun()
-
-    # === FINAL SCORES ===
-    elif st.session_state.task == 4:
-        st.title("Dementia Detection - Results")
-
-        # Initialize the recognizer
-        recognizer = sr.Recognizer()
-
-        if st.session_state.voice_audio:
-            # Display the audio player
-            st.audio(st.session_state.voice_audio, format="audio/wav")
-
-            # Read the audio data from the UploadedFile object
-            audio_bytes = st.session_state.voice_audio.read()  # Read the content as bytes
-
-            # Use BytesIO to create a file-like object from the bytes data
-            audio_file_like = io.BytesIO(audio_bytes)
-
-            # Load the audio data from the BytesIO object
-            with sr.AudioFile(audio_file_like) as source:
-                # Adjust for ambient noise (optional)
-                recognizer.adjust_for_ambient_noise(source)
-
-                # Record the audio data
-                audio = recognizer.record(source)
-
-            # Recognize the speech in the audio data
+        else:
+            user_answer = st.session_state.get(f"answer_{idx}", "")
             try:
-                # Using Google's Web Speech API for recognition
-                text = recognizer.recognize_google(audio)
-                st.write("Transcription: ", text)
-            except sr.UnknownValueError:
-                st.write("Could not understand audio")
-            except sr.RequestError as e:
-                st.write(f"Could not request results from the service; {e}")
+                if user_answer.strip() != "" and int(user_answer.strip()) == correct_answer:
+                    st.session_state.correct_count += 1
+                st.session_state.math_answers.append(user_answer.strip())
+            except:
+                st.session_state.math_answers.append("")
 
-            # Convert raw audio bytes to numpy array (assuming 16-bit PCM)
-            audio_np = np.frombuffer(audio_bytes, dtype=np.int16)
-
-            # Create an in-memory WAV file using the wave module
-            buffer = io.BytesIO()
-            with wave.open(buffer, 'wb') as wav_file:
-                wav_file.setnchannels(1)  # Mono
-                wav_file.setsampwidth(2)  # 16-bit PCM
-                wav_file.setframerate(22050)  # Match sample rate from original function
-                wav_file.writeframes(audio_np.tobytes())
-
-            buffer.seek(0)  # Move to the beginning of the file
-
-            features_468 = extract_468_features(buffer)
-
-        input_row_format = pd.read_csv('input_row_format.csv')
-
-        # Apply the LIWC category frequency computation to each transcript
-        liwc_results1 = compute_liwc_categories(text, category_names, parse)
-        liwc_results2 = compute_liwc_categories(st.session_state.text_input, category_names, parse)
-
-        # Convert the results into a DataFrame with one column for each LIWC category
-        liwc_df1 = pd.DataFrame([liwc_results1])
-        liwc_df2 = pd.DataFrame([liwc_results2])
-
-        # Ensure that liwc_df has the same columns as X_train
-        liwc_df1 = liwc_df1.reindex(columns=input_row_format.columns, fill_value=0)
-        liwc_df2 = liwc_df2.reindex(columns=input_row_format.columns, fill_value=0)
-
-        liwc_df1['brunets_index'] = brunets_index(text)
-        liwc_df1['honores_statistic'] = honores_statistic(text)
-        liwc_df1['standardized_entropy'] = standardized_entropy(text)
-        liwc_df1['RTTR'] = root_type_token_ratio(text)
-
-        liwc_df2['brunets_index'] = brunets_index(st.session_state.text_input)
-        liwc_df2['honores_statistic'] = honores_statistic(st.session_state.text_input)
-        liwc_df2['standardized_entropy'] = standardized_entropy(st.session_state.text_input)
-        liwc_df2['RTTR'] = root_type_token_ratio(st.session_state.text_input)
-
-        # 1. Write the list only once so you don’t repeat yourself
-        desired_cols = [
-            'pronoun', 'ipron', 'social', 'verb', 'auxverb', 'present', 'bio', 'adverb', 'nonfl',
-            'affect', 'posemo', 'ppron', 'they', 'future', 'discrep', 'article', 'inhib', 'time',
-            'conj', 'you', 'assent', 'i', 'shehe', 'quant', 'past', 'body', 'percept', 'feel',
-            'family', 'see', 'home', 'negemo', 'filler', 'sad', 'achieve', 'hear', 'we', 'work',
-            'health', 'anx', 'anger', 'swear', 'money', 'death', 'relig', 'friend', 'sexual',
-            'brunets_index', 'honores_statistic', 'standardized_entropy', 'RTTR'
-        ]
-
-        # 2-A.  If you *know* all those columns exist after your first reindex:
-        liwc_df1 = liwc_df1[desired_cols].copy()
-        liwc_df2 = liwc_df2[desired_cols].copy()
-
-        features_468 = features_468[:, [198, 1, 0]]
-
-        y_prob1 = linguistic.predict_proba(liwc_df1)
-        y_prob2 = linguistic.predict_proba(liwc_df2)
-        y_prob3 = acoustic.predict_proba(features_468)
-
-        # The output of predict_proba() is an array with two columns:
-        # Column 0: Probability of the class '0' (no dementia)
-        # Column 1: Probability of the class '1' (dementia)
-
-        # To get the probability of dementia (class 1):
-        dementia_prob1 = y_prob1[0][1]  # This gives the probability of class 1 (dementia)
-        dementia_prob2 = y_prob2[0][1]
-
-        pic_desc = {
-            "images/image1.jpg": "This is a picture featuring a chaotic kitchen scene. The man is busy cutting veggies while the girls are cooking something. The dustbin is smelly and overfilled with waste. The mop and bucket are lying on the floor with water spilled over. The cat is sitting in the middle. There are many items on the table. The water in the pots in the oven is boiling. The kitchen is in complete disarray.",
-            "images/image2.jpg": "This is a picture of a typical organized kitchen. The pans are neatly hanging on the wall. There is a fridge, oven, and chimney. The sink is kept clean with no dishes to wash. There's a small vase that adds to the aesthetics of the kitchen. The floor is made of vitrified checkered tiles, which are shiny and spick-free. Such an organized and neat place makes people happy.",
-            "images/image3.jpg": "This picture features a mom with her two kids, a girl and a boy. The mom is busy doing the dishes with the sink overflowing with water, while the children are up to some naughty behavior. It seems both are busy stealing cookies from the shelf behind their mom's back. The boy is about to fall as the stool on which he is standing seems to topple while his sister is giggling or laughing and demands more cookies from her brother.",
-            "images/image4.jpg": "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."
-        }
-
-        desc_text = pic_desc[st.session_state.selected_image]
-
-        # Initialize the TF-IDF Vectorizer
-        vectorizer = TfidfVectorizer()
-
-        # Compute TF-IDF vectors for the texts
-        tfidf_matrix1 = vectorizer.fit_transform([text, desc_text])
-        tfidf_matrix2 = vectorizer.fit_transform([st.session_state.text_input, desc_text])
-
-        # Compute cosine similarity between the two vectors
-        context_score1 = cosine_similarity(tfidf_matrix1[0:1], tfidf_matrix1[1:2])[0][0]
-        context_score2 = cosine_similarity(tfidf_matrix2[0:1], tfidf_matrix2[1:2])[0][0]
-
-        linguistic_score = (dementia_prob1 + dementia_prob2) * 100 / 2
-        acoustic_score = y_prob3[0][1] * 100
-        calculation_score = (st.session_state.correct_count / 6) * 100
-        memory_score = calculate_retention_score(text, st.session_state.text_input)
-
-        total_score = (linguistic_score + acoustic_score + (100 - calculation_score) + (100 - memory_score)) / 4
-
-        context_score = (context_score1 + context_score2) * 100 / 2
-        final_score = classify_dementia_scale(context_score / 100, total_score / 100)
-
-        st.metric("📝 Linguistic Score", f"{linguistic_score:.2f}%")
-        st.caption("A higher linguistic score increases the risk of dementia")
-
-        st.metric("🎤 Acoustic Score", f"{acoustic_score:.2f}%")
-        st.caption("A higher acoustic score increases the risk of dementia")
-
-        st.metric("➗ Calculation Score", f"{calculation_score:.2f}%")
-        st.caption("A higher calculation score decreases the risk of dementia")
-
-        st.metric("🧠 Memory Score", f"{memory_score:.2f}%")
-        st.caption("A higher memory score decreases the risk of dementia")
-
-        st.metric("🔍 Context Score", f"{context_score:.2f}%")
-        st.caption("A higher context score decreases the risk of dementia")
-
-        st.success(f"Total Dementia Risk Score: {final_score:.2f}%")
-
-        st.write("✅ Thank you for participating!")
-
-        if st.button("Restart"):
-            for key in st.session_state.keys():
-                del st.session_state[key]
+            st.session_state.current_question_index += 1
+            st.session_state.timer = 0
             st.rerun()
 
-with tab2:
-    # Streamlit app title
-    st.title('Health Information Input Form')
+    # Show "Next" button only once — after all questions
+    else:
+        st.success("✅ All 6 questions completed.")
+        st.write(f"Correct answers: {st.session_state.correct_count} / 6")
+        if st.button("Next Task"):
+            st.session_state.task = 3
+            st.rerun()
 
-    # Input fields based on the columns
-    diabetic = st.selectbox('Diabetic Status', [1, 0])
-    alcohol_level1 = st.text_input("Alcohol Level:", value="0.084973629")
-    try:
-        # Attempt to convert to float
-        alcohol_level = float(alcohol_level1)
+# === TASK 3 ===
+elif st.session_state.task == 3:
+    st.title("Dementia Detection - Task 3")
+    st.subheader("Describe the same image from Task 1 (without seeing it):")
 
-    except ValueError:
-        # Handle the error if conversion fails
-        st.error("Please enter a valid decimal number.")
-    heart_rate = st.number_input('Heart Rate', min_value=50, max_value=120, step=1)
-    blood_oxygen1 = st.text_input('Blood Oxygen Level (%)', value="96.23074296")
-    try:
-        # Attempt to convert to float
-        blood_oxygen = float(blood_oxygen1)
+    text_input = st.text_area("Describe the image in text:", value=st.session_state.text_input)
+    st.session_state.text_input = text_input
 
-    except ValueError:
-        # Handle the error if conversion fails
-        st.error("Please enter a valid decimal number.")
-    body_temp1 = st.text_input('Body Temperature (°C)', value="36.22485168")
-    try:
-        # Attempt to convert to float
-        body_temp = float(body_temp1)
+    if st.button("Submit"):
+        st.session_state.task = 4
+        st.rerun()
 
-    except ValueError:
-        # Handle the error if conversion fails
-        st.error("Please enter a valid decimal number.")
-    weight1 = st.text_input('Weight (kg)', value="57.56397754")
-    try:
-        # Attempt to convert to float
-        weight = float(weight1)
+# === FINAL SCORES ===
+elif st.session_state.task == 4:
+    st.title("Dementia Detection - Results")
 
-    except ValueError:
-        # Handle the error if conversion fails
-        st.error("Please enter a valid decimal number.")
-    mri_delay1 = st.text_input('MRI Delay ', value="36.42102798")
-    try:
-        # Attempt to convert to float
-        mri_delay = float(mri_delay1)
+    # Initialize the recognizer
+    recognizer = sr.Recognizer()
 
-    except ValueError:
-        # Handle the error if conversion fails
-        st.error("Please enter a valid decimal number.")
-    prescription = st.text_input('Prescription')
-    dosage = st.number_input('Dosage (mg)', min_value=0.0, max_value=30.0, step=0.5)
-    age = st.number_input('Age', min_value=0, max_value=100, step=1)
-    education_level = st.selectbox('Education Level',
-                                   ['Primary School', 'Secondary School', 'Diploma/Degree', 'No School'])
-    dominant_hand = st.selectbox('Dominant Hand', ['Right', 'Left'])
-    gender = st.selectbox('Gender', ['Male', 'Female'])
-    family_history = st.selectbox('Family History', ['Yes', 'No'])
-    smoking_status = st.selectbox('Smoking Status', ['Current Smoker', 'Former Smoker', 'Never Smoked'])
-    apoe_e4 = st.selectbox('APOE ε4 Status', ['Positive', 'Negative'])
-    physical_activity = st.selectbox('Physical Activity ', ['Sedentary', 'Moderate Activity', 'Mild Activity'])
-    depression_status = st.selectbox('Depression Status', ['Yes', 'No'])
-    cognitive_scores = st.number_input('Cognitive Test Scores', min_value=0, max_value=10, step=1)
-    medication_history = st.selectbox('Medication History', ['Yes', 'No'])
-    nutrition_diet = st.selectbox('Nutrition/Diet Quality', ['Low-Carb Diet', 'Mediterranean Diet', 'Balanced Diet'])
-    sleep_quality = st.selectbox('Sleep Quality', ['Poor', 'Good', 'Bad'])
-    chronic_conditions = st.selectbox('Chronic Health Conditions',
-                                      ['Diabetes', 'Heart Disease', 'Hypertension', 'None'])
+    if st.session_state.voice_audio:
+        # Display the audio player
+        st.audio(st.session_state.voice_audio, format="audio/wav")
 
-    with open('rfc.pkl', 'rb') as file:
-        rfc = pickle.load(file)
+        # Read the audio data from the UploadedFile object
+        audio_bytes = st.session_state.voice_audio.read()  # Read the content as bytes
 
-    # Button to process input
-    if st.button('Submit details'):
+        # Use BytesIO to create a file-like object from the bytes data
+        audio_file_like = io.BytesIO(audio_bytes)
 
-        # Displaying a confirmation message and the entered information
-        st.success('Submitted Successfully!')
-        input_data = np.array([[diabetic,
-                                alcohol_level,
-                                heart_rate,
-                                blood_oxygen,
-                                body_temp,
-                                weight,
-                                mri_delay,
-                                prescription,
-                                dosage,
-                                age,
-                                education_level,
-                                dominant_hand,
-                                gender,
-                                family_history,
-                                smoking_status,
-                                apoe_e4,
-                                physical_activity,
-                                depression_status,
-                                cognitive_scores,
-                                medication_history,
-                                nutrition_diet,
-                                sleep_quality,
-                                chronic_conditions]])
-        df = pd.DataFrame(input_data, columns=['Diabetic', 'AlcoholLevel', 'HeartRate', 'BloodOxygenLevel',
-                                               'BodyTemperature', 'Weight', 'MRI_Delay', 'Prescription',
-                                               'Dosage in mg', 'Age', 'Education_Level', 'Dominant_Hand', 'Gender',
-                                               'Family_History', 'Smoking_Status', 'APOE_ε4', 'Physical_Activity',
-                                               'Depression_Status', 'Cognitive_Test_Scores', 'Medication_History',
-                                               'Nutrition_Diet', 'Sleep_Quality', 'Chronic_Health_Conditions'])
-        df["Prescription"].fillna("None", inplace=True)
-        df["Dosage in mg"].fillna(0, inplace=True)
-        df["Chronic_Health_Conditions"].fillna("None", inplace=True)
-        cats = ["Prescription", "Education_Level", "Dominant_Hand", "Gender", "Family_History", "Smoking_Status",
-                "APOE_ε4",
-                "Physical_Activity", "Depression_Status", "Medication_History", "Nutrition_Diet", "Sleep_Quality",
-                "Chronic_Health_Conditions"]
-        le = LabelEncoder()
-        for i in cats:
-            df[i] = le.fit_transform(df[i])
-        x = df.iloc[:, :].values
+        # Load the audio data from the BytesIO object
+        with sr.AudioFile(audio_file_like) as source:
+            # Adjust for ambient noise (optional)
+            recognizer.adjust_for_ambient_noise(source)
 
-        scaling = MinMaxScaler()
-        x = scaling.fit_transform(x)
+            # Record the audio data
+            audio = recognizer.record(source)
 
-        prediction = rfc.predict_proba(x)
+        # Recognize the speech in the audio data
+        try:
+            # Using Google's Web Speech API for recognition
+            text = recognizer.recognize_google(audio)
+            st.write("Transcription: ", text)
+        except sr.UnknownValueError:
+            st.write("Could not understand audio")
+        except sr.RequestError as e:
+            st.write(f"Could not request results from the service; {e}")
 
-        p = prediction[0][1] * 100
-        st.write(f"Total Dementia Risk Score: {p:.2f}%")
+        # Convert raw audio bytes to numpy array (assuming 16-bit PCM)
+        audio_np = np.frombuffer(audio_bytes, dtype=np.int16)
+
+        # Create an in-memory WAV file using the wave module
+        buffer = io.BytesIO()
+        with wave.open(buffer, 'wb') as wav_file:
+            wav_file.setnchannels(1)  # Mono
+            wav_file.setsampwidth(2)  # 16-bit PCM
+            wav_file.setframerate(22050)  # Match sample rate from original function
+            wav_file.writeframes(audio_np.tobytes())
+
+        buffer.seek(0)  # Move to the beginning of the file
+
+        features_468 = extract_468_features(buffer)
+
+    input_row_format = pd.read_csv('input_row_format.csv')
+
+    # Apply the LIWC category frequency computation to each transcript
+    liwc_results1 = compute_liwc_categories(text, category_names, parse)
+    liwc_results2 = compute_liwc_categories(st.session_state.text_input, category_names, parse)
+
+    # Convert the results into a DataFrame with one column for each LIWC category
+    liwc_df1 = pd.DataFrame([liwc_results1])
+    liwc_df2 = pd.DataFrame([liwc_results2])
+
+    # Ensure that liwc_df has the same columns as X_train
+    liwc_df1 = liwc_df1.reindex(columns=input_row_format.columns, fill_value=0)
+    liwc_df2 = liwc_df2.reindex(columns=input_row_format.columns, fill_value=0)
+
+    liwc_df1['brunets_index'] = brunets_index(text)
+    liwc_df1['honores_statistic'] = honores_statistic(text)
+    liwc_df1['standardized_entropy'] = standardized_entropy(text)
+    liwc_df1['RTTR'] = root_type_token_ratio(text)
+
+    liwc_df2['brunets_index'] = brunets_index(st.session_state.text_input)
+    liwc_df2['honores_statistic'] = honores_statistic(st.session_state.text_input)
+    liwc_df2['standardized_entropy'] = standardized_entropy(st.session_state.text_input)
+    liwc_df2['RTTR'] = root_type_token_ratio(st.session_state.text_input)
+
+    # 1. Write the list only once so you don’t repeat yourself
+    desired_cols = [
+        'pronoun', 'ipron', 'social', 'verb', 'auxverb', 'present', 'bio', 'adverb', 'nonfl',
+        'affect', 'posemo', 'ppron', 'they', 'future', 'discrep', 'article', 'inhib', 'time',
+        'conj', 'you', 'assent', 'i', 'shehe', 'quant', 'past', 'body', 'percept', 'feel',
+        'family', 'see', 'home', 'negemo', 'filler', 'sad', 'achieve', 'hear', 'we', 'work',
+        'health', 'anx', 'anger', 'swear', 'money', 'death', 'relig', 'friend', 'sexual',
+        'brunets_index', 'honores_statistic', 'standardized_entropy', 'RTTR'
+    ]
+
+    # 2-A.  If you *know* all those columns exist after your first reindex:
+    liwc_df1 = liwc_df1[desired_cols].copy()
+    liwc_df2 = liwc_df2[desired_cols].copy()
+
+    features_468 = features_468[:, [198, 1, 0]]
+
+    y_prob1 = linguistic.predict_proba(liwc_df1)
+    y_prob2 = linguistic.predict_proba(liwc_df2)
+    y_prob3 = acoustic.predict_proba(features_468)
+
+    # The output of predict_proba() is an array with two columns:
+    # Column 0: Probability of the class '0' (no dementia)
+    # Column 1: Probability of the class '1' (dementia)
+
+    # To get the probability of dementia (class 1):
+    dementia_prob1 = y_prob1[0][1]  # This gives the probability of class 1 (dementia)
+    dementia_prob2 = y_prob2[0][1]
+
+    pic_desc = {
+        "images/image1.jpg": "This is a picture featuring a chaotic kitchen scene. The man is busy cutting veggies while the girls are cooking something. The dustbin is smelly and overfilled with waste. The mop and bucket are lying on the floor with water spilled over. The cat is sitting in the middle. There are many items on the table. The water in the pots in the oven is boiling. The kitchen is in complete disarray.",
+        "images/image2.jpg": "This is a picture of a typical organized kitchen. The pans are neatly hanging on the wall. There is a fridge, oven, and chimney. The sink is kept clean with no dishes to wash. There's a small vase that adds to the aesthetics of the kitchen. The floor is made of vitrified checkered tiles, which are shiny and spick-free. Such an organized and neat place makes people happy.",
+        "images/image3.jpg": "This picture features a mom with her two kids, a girl and a boy. The mom is busy doing the dishes with the sink overflowing with water, while the children are up to some naughty behavior. It seems both are busy stealing cookies from the shelf behind their mom's back. The boy is about to fall as the stool on which he is standing seems to topple while his sister is giggling or laughing and demands more cookies from her brother.",
+        "images/image4.jpg": "This is a lively playground scene. All people seem so happy and cheerful, especially the children. Some are enjoying the slide while others are on the swings. A girl seems to be busy sharing something with her friend sitting on the bench, while her friend seems uninterested and more focused on eating. Two children are skipping ropes. An elder seems to have come with his baby in a stroller. One person seems to walk his dog. The two children seem thirsty, as they are quenching their thirst by drinking from the tap. Some children are playing tag. The person sitting on the bench seems to be speaking on the phone. Overall, the atmosphere seems merry."
+    }
+
+    desc_text = pic_desc[st.session_state.selected_image]
+
+    # Initialize the TF-IDF Vectorizer
+    vectorizer = TfidfVectorizer()
+
+    # Compute TF-IDF vectors for the texts
+    tfidf_matrix1 = vectorizer.fit_transform([text, desc_text])
+    tfidf_matrix2 = vectorizer.fit_transform([st.session_state.text_input, desc_text])
+
+    # Compute cosine similarity between the two vectors
+    context_score1 = cosine_similarity(tfidf_matrix1[0:1], tfidf_matrix1[1:2])[0][0]
+    context_score2 = cosine_similarity(tfidf_matrix2[0:1], tfidf_matrix2[1:2])[0][0]
+
+    linguistic_score = (dementia_prob1 + dementia_prob2) * 100 / 2
+    acoustic_score = y_prob3[0][1] * 100
+    calculation_score = (st.session_state.correct_count / 6) * 100
+    memory_score = calculate_retention_score(text, st.session_state.text_input)
+
+    total_score = (linguistic_score + acoustic_score + (100 - calculation_score) + (100 - memory_score)) / 4
+
+    context_score = (context_score1 + context_score2) * 100 / 2
+    final_score = classify_dementia_scale(context_score / 100, total_score / 100)
+
+    st.metric("📝 Linguistic Score", f"{linguistic_score:.2f}%")
+    st.caption("A higher linguistic score increases the risk of dementia")
+
+    st.metric("🎤 Acoustic Score", f"{acoustic_score:.2f}%")
+    st.caption("A higher acoustic score increases the risk of dementia")
+
+    st.metric("➗ Calculation Score", f"{calculation_score:.2f}%")
+    st.caption("A higher calculation score decreases the risk of dementia")
+
+    st.metric("🧠 Memory Score", f"{memory_score:.2f}%")
+    st.caption("A higher memory score decreases the risk of dementia")
+
+    st.metric("🔍 Context Score", f"{context_score:.2f}%")
+    st.caption("A higher context score decreases the risk of dementia")
+
+    st.success(f"Total Dementia Risk Score: {final_score:.2f}%")
+
+    st.write("✅ Thank you for participating!")
+
+    if st.button("Restart"):
+        for key in st.session_state.keys():
+            del st.session_state[key]
+        st.rerun()
