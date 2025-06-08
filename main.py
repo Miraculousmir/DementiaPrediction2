@@ -348,6 +348,7 @@ elif st.session_state.task == 4:
 
     # Initialize the recognizer
     recognizer = sr.Recognizer()
+    text = ""
 
     if st.session_state.voice_audio:
         # Display the audio player
