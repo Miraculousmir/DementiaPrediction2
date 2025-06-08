@@ -570,7 +570,7 @@ with tab2:
         rfc = pickle.load(file)
 
     # Button to process input
-    if st.button('Submit'):
+    if st.button('Submit details'):
 
         # Displaying a confirmation message and the entered information
         st.success('Submitted Successfully!')
